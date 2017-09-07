@@ -5,19 +5,19 @@ using namespace std;
 
 class Validator {
     private:
-        String regularExpression;
-        String str;
+        string regularExpression;
+        string str;
     public:
         Validator();
-        void setRegularExpression(String expression);
-        void setCadena(String str);
+        void setRegularExpression(string expression);
+        void setCadena(string str);
         bool valida();
         ~Validator();
 };
 
 Validator::Validator() {
-    _regularExpression = "";
-    _str = "";
+    this->regularExpression = "";
+    this->str = "";
 }
 
 int main() {

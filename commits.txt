@@ -1,0 +1,5 @@
+commit 5663bdcd4a86d8972130cffb8202109d2fc2b681
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Thu Sep 7 10:29:36 2017 -0500
+
+    Initiation, definition of class
