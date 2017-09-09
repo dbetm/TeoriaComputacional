@@ -1,3 +1,15 @@
+commit a9dc48da2bc4b9b866f8c41df0be5b8acc0e9596
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Thu Sep 7 11:24:12 2017 -0500
+
+    Definition of classes, test1
+
+commit 412dbdea616845caac253c0a7f1330caba9a382f
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Thu Sep 7 10:41:34 2017 -0500
+
+    Fix, type String -> string
+
 commit 5663bdcd4a86d8972130cffb8202109d2fc2b681
 Author: davbetm@gmail.com <davbetm@gmail.com>
 Date:   Thu Sep 7 10:29:36 2017 -0500

@@ -12,7 +12,8 @@ class Validator {
         void setRegularExpression(string);
         void setCadena(string);
         bool valida();
-        int findMeta(); //Busca el primer meta-carácter
+        int findMeta(pos); //Va buscando meta-carácteres y retorna sus posciones
+        bool filertAst();
         ~Validator();
 };
 
@@ -31,19 +32,21 @@ void Validator::setCadena(string str) {
 }
 
 bool Validator::valida() {
-    int pos = findMeta();
+    int pos = 0
     bool answer = false;
+
+    //while(false) {}
+    pos = findMeta(pos);
 
     switch (regularExpression[pos]) {
         case '*':
             cout << "Encontré un *" << endl;
             break;
         case '+':
-            /*if(!filertAst()) {
+            if(!filertAst(pos)) {
                 answer = false;
                 break;
             }
-            */
         case '|':
             break;
         case '?':
@@ -51,13 +54,39 @@ bool Validator::valida() {
         default:
             break;
     }
-
+    
     return answer;
 }
 
-int Validator::findMeta() {
-    int posFirstMetaChar = regularExpression.find_first_of("*|+.?");
-    return posFirstMetaChar;
+int Validator::findMeta(int pos) {
+    for (int i = pos; i < str.size(); i++) {
+        if(str[i] == '*') {
+            pos = i;
+            break;
+        }
+        else if(str[i] == '|') {
+            pos = i;
+            break;
+        }
+        else if(str[i] == '+') {
+            pos = i;
+            break;
+        }
+        else if(str[i] == '?') {
+            pos = i;
+            break;
+        }
+        else if(str[i] == '.') {
+            pos = i;
+            break;
+        }
+    }
+    //int posFirstMetaChar = regularExpression.find_first_of("*|+.?");
+    return pos;
+}
+
+bool Validator::filertAst() {
+
 }
 
 Validator::~Validator(){}
