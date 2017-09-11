@@ -4,6 +4,8 @@
 
 using namespace std;
 
+int menu();
+
 class Validator {
     private:
         string regularExpression;
@@ -20,7 +22,7 @@ class Validator {
         bool filterAst(int, char);
         bool filterPlus(int, char);
         bool filterPipe(char, char);
-        bool filterQues(char);
+        bool filterQues(int, char);
         ~Validator();
 };
 
@@ -32,11 +34,11 @@ Validator::Validator() {
 
 void Validator::setRegularExpression(string expression) {
     this->regularExpression = expression;
-    cout << this->regularExpression << endl;
 }
 
 void Validator::setStr(string str) {
     this->str = str;
+    posChars = 0;
 }
 
 string Validator::getRegularExpression() {
@@ -73,7 +75,7 @@ bool Validator::valida() {
                 }
                 break;
             case '?':
-                if(!filterQues(regularExpression[pos - 1])) answer = false;
+                if(!filterQues(pos, regularExpression[pos - 1])) answer = false;
                 break;
             case '.':
                 break;
@@ -117,7 +119,7 @@ bool Validator::filterAst(int pos, char simbol) {
     bool answer = true;
     int i = posChars;
 
-    while(str[i] == simbol) {
+    while(str[i] == simbol || simbol == 'E') {
         i++;
     }
     posChars = i;
@@ -159,9 +161,28 @@ bool Validator::filterPipe(char x, char y) {
     return answer;
 }
 
-bool Validator::filterQues(char simbol) {
-    if(str[posChars+1] == simbol) {
+bool Validator::filterQues(int pos, char simbol) {
+
+    if(posChars == 0) { //es una situación especial cuando el primer meta-caracter es '?'
+        if(str[posChars] == simbol || str[posChars] == 'E') { // E = Epsilon
+            posChars++;
+            if(pos == regularExpression.length() - 1) { //si ya es el primer y últmi meta-carácter a evaluar
+                for(int i = posChars; i < str.length(); i++) { //si entra al ciclo y no es vacío entonces ya no cumple
+                    if(str[i] == 'E') continue; ///tener muchos epsilon da lo mismo
+                    return false;
+                }
+            }
+        }
+    }
+    else if(str[posChars+1] == simbol || str[posChars+1] == 'E') { //se le suma uno, ya que siempre queda un lugar atrás después de la siguiente letra
         posChars++;
+        if(pos == regularExpression.length() - 1) {
+            for(int i = posChars+1; i < str.length(); i++) {
+                cout << "Hola mundo" << endl;
+                if(str[i] == 'E') continue; ///tener muchos epsilon da lo mismo
+                return false;
+            }
+        }
     }
     return true;
 }
@@ -169,21 +190,57 @@ bool Validator::filterQues(char simbol) {
 Validator::~Validator() {}
 
 int main() {
-    Validator v;
-    bool x;
+    int opt;
+    bool answer, control = true;
+    string regularExpression, str;
 
-    v.setRegularExpression("x|m.a?.b");
-    v.setStr("xmb");
+    Validator v; // se instancia un nuevo objeto
 
-    /*
-    v.setRegularExpression("a+.b*.c.b|d.x?");
-    v.setStr("bcx");
-    */
-    x = v.valida();
-    cout << "La expresión regular es: " << v.getRegularExpression() << endl;
-    cout << "La cadena es: " << v.getStr() << endl;
-    if(!x) cout << "No se acepta" << endl;
-    else cout << "Se acepta" << endl;
+    do {
+        system("clear");
+        opt = menu();
+        switch(opt) {
+            case 1:
+                cout << "Escriba la nueva expresión regular: ";
+                cin >> regularExpression;
+                v.setRegularExpression(regularExpression);
+                cout << "¡Hecho!" << endl;
+                break;
+            case 2:
+                cout << "\nLa expresión regular es: " << v.getRegularExpression() << endl;
+                break;
+            case 3:
+                cout << "\nEscriba la cadena a validar: ";
+                cin >> str;
+                v.setStr(str);
+                answer = v.valida();
+                cout << "La cadena: " << v.getStr() << "--> ";
+                if(!answer) cout << "NO SE ACEPTA." << endl;
+                else cout << "SE ACEPTA." << endl;
+                break;
+            case 4:
+                control = false;
+                break;
+            case 5:
+                cout << "¡Opción no válida!" << endl;
+                break;
+        }
+        cout << "\nPresione una tecla para continuar...";
+        cin.ignore().get();
+    } while(control);
 
     return 0;
+}
+
+int menu() {
+    int opt;
+    cout << "\t>> Menú <<" << endl;
+    cout << "[1] Nueva expresión regular." << endl;
+    cout << "[2] Ver expresión regular." << endl;
+    cout << "[3] Validar cadena." << endl;
+    cout << "[4] Salir." << endl;
+    cout << ">> ";
+    cin >> opt;
+
+    return opt;
 }
