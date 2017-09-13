@@ -23,6 +23,7 @@ class Validator {
         bool filterPlus(int, char);
         bool filterPipe(char, char);
         bool filterQues(int, char);
+        bool filterPoint(int, char);
         ~Validator();
 };
 
@@ -62,22 +63,32 @@ bool Validator::valida() {
             case '*':
                 if(!filterAst(pos, regularExpression[pos - 1])) {
                     answer = false;
+                    cout << "Asterisco dice que no" << endl;
                 }
                 break;
             case '+':
                 if(!filterPlus(pos, regularExpression[pos - 1])) {
                     answer = false;
+                    cout << "Plus dice que no" << endl;
                 }
                 break;
             case '|':
                 if(!filterPipe(regularExpression[pos - 1], regularExpression[pos + 1])) {
                     answer = false;
+                    cout << "Pipe dice que no" << endl;
                 }
                 break;
             case '?':
-                if(!filterQues(pos, regularExpression[pos - 1])) answer = false;
+                if(!filterQues(pos, regularExpression[pos - 1])) {
+                    answer = false;
+                    cout << "Ques dice que no" << endl;
+                }
                 break;
             case '.':
+                if(!filterPoint(pos, regularExpression[pos - 1])) {
+                    answer = false;
+                    cout << "Point dice que no" << endl;
+                }
                 break;
         }
         //cout << "Aquí estoy" << endl;
@@ -148,16 +159,10 @@ bool Validator::filterPipe(char x, char y) {
 
     if(posChars != 0) posChars++;
 
-    //cout << posChars << endl << x << ", " << y << endl;
     if(str[posChars] == x || str[posChars] == y) {
-        //cout << str[posChars] << endl;
         answer = true;
     }
-    //cout << "Pipe dice: " << answer << endl;
 
-    if(posChars == 0 && str[posChars+1] == y) {
-        answer = false;
-    }
     return answer;
 }
 
@@ -178,13 +183,17 @@ bool Validator::filterQues(int pos, char simbol) {
         posChars++;
         if(pos == regularExpression.length() - 1) {
             for(int i = posChars+1; i < str.length(); i++) {
-                cout << "Hola mundo" << endl;
                 if(str[i] == 'E') continue; ///tener muchos epsilon da lo mismo
                 return false;
             }
         }
     }
     return true;
+}
+
+bool Validator::filterPoint(int pos, char simbol) {
+    bool answer = true;
+    return answer;
 }
 
 Validator::~Validator() {}
@@ -214,7 +223,7 @@ int main() {
                 cin >> str;
                 v.setStr(str);
                 answer = v.valida();
-                cout << "La cadena: " << v.getStr() << "--> ";
+                cout << "La cadena: " << v.getStr() << " --> ";
                 if(!answer) cout << "NO SE ACEPTA." << endl;
                 else cout << "SE ACEPTA." << endl;
                 break;
