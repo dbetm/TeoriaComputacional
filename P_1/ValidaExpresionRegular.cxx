@@ -19,10 +19,11 @@ class Validator {
         string getStr();
         bool valida();
         int findMeta(int); //Va buscando meta-carácteres y retorna sus posciones
-        bool filterAst(int, char);
+        bool filterAst(char);
         bool filterPlus(int, char);
         bool filterPipe(char, char);
         bool filterQues(int, char);
+        bool filterPoint(int, char, char);
         ~Validator();
 };
 
@@ -50,40 +51,52 @@ string Validator::getStr() {
 }
 
 bool Validator::valida() {
-    int pos = 0;
+    int pos = 0, aux = 0;
     bool answer = true;
+    char latestMeta;
     system("clear");
     while(true) {
-
         pos = findMeta(pos);
-        cout << regularExpression[pos] << endl;
-        //cout << "La posición en la expresión es: " << pos << endl;
+        cout << latestMeta << endl;
+
+        if(aux == pos) break;
+        aux = pos;
+
         switch(regularExpression[pos]) {
             case '*':
-                if(!filterAst(pos, regularExpression[pos - 1])) {
+                latestMeta = '*';
+                if(!filterAst(regularExpression[pos - 1])) {
                     answer = false;
+                    cout << "asterisco" << endl;
                 }
                 break;
             case '+':
+                latestMeta = '+';
                 if(!filterPlus(pos, regularExpression[pos - 1])) {
                     answer = false;
+                    cout << "plus" << endl;
                 }
                 break;
             case '|':
+                latestMeta = '|';
                 if(!filterPipe(regularExpression[pos - 1], regularExpression[pos + 1])) {
                     answer = false;
+                    cout << "pipe" << endl;
                 }
                 break;
             case '?':
-                if(!filterQues(pos, regularExpression[pos - 1])) answer = false;
+                latestMeta = '?';
+                if(!filterQues(pos, regularExpression[pos - 1])) {
+                    cout << "ques" << endl;
+                    answer = false;
+                }
                 break;
             case '.':
+            if(latestMeta == '.') posChars++;
+                latestMeta = '.';
                 break;
         }
-        //cout << "Aquí estoy" << endl;
-        if(answer == false || pos == regularExpression.length() - 1 || pos == regularExpression.length() - 2) {
-            break;
-        }
+        if(answer == false) break;
     }
     return answer;
 }
@@ -115,7 +128,7 @@ int Validator::findMeta(int pos) {
     return pos;
 }
 
-bool Validator::filterAst(int pos, char simbol) {
+bool Validator::filterAst(char simbol) {
     bool answer = true;
     int i = posChars;
 
@@ -123,8 +136,6 @@ bool Validator::filterAst(int pos, char simbol) {
         i++;
     }
     posChars = i;
-    //cont puede ser 0, por ende la respuesta no se modifica
-    //cout << "asterisco dice: " << answer << endl;
     return answer;
 }
 
@@ -132,59 +143,50 @@ bool Validator::filterPlus(int pos, char simbol) {
     bool answer = true;
     int cont = 0;
     int i = posChars;
+    cout << "Estoy en plus\n" << simbol << endl;
+
     while(str[i] == simbol) {
         cont++;
         i++;
     }
     posChars = i;
     if(cont < 1) answer = false;
-    //cout << "Contador vale: " << cont << endl;
-    //cout << "Plus dice: " << answer << endl;
+
     return answer;
 }
 
 bool Validator::filterPipe(char x, char y) {
     bool answer = false;
-
-    if(posChars != 0) posChars++;
-
-    //cout << posChars << endl << x << ", " << y << endl;
+    char c;
+    //cout << str[posChars] << endl;
     if(str[posChars] == x || str[posChars] == y) {
-        //cout << str[posChars] << endl;
         answer = true;
+        if(str[posChars] == x) c = y;
+        else c = x;
     }
-    //cout << "Pipe dice: " << answer << endl;
-
-    if(posChars == 0 && str[posChars+1] == y) {
-        answer = false;
+    if(posChars != str.length() - 1) {
+        if(str[posChars + 1] == c) answer = false;
     }
     return answer;
 }
 
 bool Validator::filterQues(int pos, char simbol) {
-
     if(posChars == 0) { //es una situación especial cuando el primer meta-caracter es '?'
         if(str[posChars] == simbol || str[posChars] == 'E') { // E = Epsilon
-            posChars++;
+            //posChars++;
             if(pos == regularExpression.length() - 1) { //si ya es el primer y últmi meta-carácter a evaluar
-                for(int i = posChars; i < str.length(); i++) { //si entra al ciclo y no es vacío entonces ya no cumple
+                for(int i = posChars + 1; i < str.length(); i++) { //si entra al ciclo y no es vacío entonces ya no cumple
                     if(str[i] == 'E') continue; ///tener muchos epsilon da lo mismo
                     return false;
                 }
             }
         }
     }
-    else if(str[posChars+1] == simbol || str[posChars+1] == 'E') { //se le suma uno, ya que siempre queda un lugar atrás después de la siguiente letra
-        posChars++;
-        if(pos == regularExpression.length() - 1) {
-            for(int i = posChars+1; i < str.length(); i++) {
-                cout << "Hola mundo" << endl;
-                if(str[i] == 'E') continue; ///tener muchos epsilon da lo mismo
-                return false;
-            }
-        }
-    }
+    if(str[posChars] == simbol) posChars++;
     return true;
+}
+
+bool Validator::filterPoint(int pos, char simbol, char latestMeta) {
 }
 
 Validator::~Validator() {}
