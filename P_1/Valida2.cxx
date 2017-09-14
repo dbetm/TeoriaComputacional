@@ -25,12 +25,12 @@ class Validator {
     private: //otras funciones
         char encuentraMeta();
         int totalMeta();
-        //filtros
-        bool filtroAsterisco(char);
-        bool filtroPlus(char);
-        bool filtroQuestion(char);
-        bool filtroPipe(char);
-
+        //filtros                       //patrones
+        bool filtroAsterisco(char);     //  x*, 0  más veces
+        bool filtroPlus(char);          // x+, 1 o más veces
+        bool filtroPipe(char, char);    // x|y, XOR x^y
+        bool filtroQuestion(char);      // x?
+        bool filtroPunto(char, char, int);         //a.
 };
 
 Validator::Validator(string expresionRegular) {
@@ -61,42 +61,57 @@ string Validator::getCadena() {
 
 bool Validator::valida() {
     bool respuesta = true;
-    char meta, ultimoMeta;
+    char meta, ultimoMeta = '<';
     int numeroMetas = totalMeta(), cont = 0;
     cout << numeroMetas << endl;
 
     while(cont < numeroMetas) {
         meta = encuentraMeta();
         //cout << "Meta: " << meta << endl;
+        cout << "En la cadena " << cadena[posCadena] << ", contador es: " << cont << endl;
         switch(meta) {
             case '*':
-                cout << expresionRegular[posExpresion - 1] << "*" << endl;
                 if(!filtroAsterisco(expresionRegular[posExpresion - 1])) respuesta = false;
                 ultimoMeta = '*';
                 cont++;
+                cout << "Astérisco dice: " << respuesta << endl;
                 break;
             case '+':
-                cout << expresionRegular[posExpresion - 1] << "+" << endl;
+                if(!filtroPlus(expresionRegular[posExpresion - 1])) respuesta = false;
                 ultimoMeta = '+';
                 cont++;
+                cout << "Plus dice: " << respuesta << endl;
                 break;
             case '|':
-                cout << expresionRegular[posExpresion - 1] << "|" << expresionRegular[posExpresion + 1] << endl;
+                if(!filtroPipe(expresionRegular[posExpresion - 1], expresionRegular[posExpresion + 1])) respuesta = false;
                 ultimoMeta = '|';
                 cont++;
+                cout << "Pipe dice: " << respuesta << endl;
                 break;
             case '?':
-                cout << expresionRegular[posExpresion - 1] << "?" << endl;
+                if(!filtroQuestion(expresionRegular[posExpresion - 1])) respuesta = false;
                 ultimoMeta = '?';
                 cont++;
+                cout << "Question dice: " << respuesta << endl;
                 break;
             case '.':
-                if(ultimoMeta == '.') {
-                    cout << expresionRegular[posExpresion - 1] << endl;
+                if(ultimoMeta == '.') { //caso [...].a.[...]
+                    if(!filtroPunto(expresionRegular[posExpresion - 1], expresionRegular[posExpresion + 1], 1)) respuesta = false;
+                    cout << "Soy la c rara" << endl;
                     cont++;
                 }
+                else if(ultimoMeta == '<') { //cuando se da el caso a.[...]
+                    if(cadena[0] != expresionRegular[posExpresion - 1]) respuesta = false;
+                    if(totalMeta() == 1) { //caso simple
+                        if(!filtroPunto(expresionRegular[posExpresion - 1], expresionRegular[posExpresion + 1], 0)) respuesta = false;
+                        else cont++;
+                    }
+                }
                 ultimoMeta = '.';
-                posCadena++;
+                if(expresionRegular[expresionRegular.length()-2] == '.') {
+                    cont++;
+                }
+                cout << "Punto: " << respuesta << endl;
                 break;
         }
         if(!respuesta) break;
@@ -146,24 +161,99 @@ char Validator::encuentraMeta() {
 
 bool Validator::filtroAsterisco(char simbolo) {
     int i = posCadena;
-    //cuando es el caso simple
+    //cuando es el caso simple -> a*
     if(totalMeta() == 1) {
         for(int j = posCadena; j < cadena.length(); j++) {
             if(cadena[j] != simbolo && cadena[j] != 'E') return false;
         }
     }
-
+    //cuando está inmerso -> .a*. -> .a* -> a*.
     while(cadena[i] == simbolo || cadena[i] == 'E') {
         i++;
     }
     posCadena = i;
+    return true;
+}
+
+bool Validator::filtroPlus(char simbolo) {
+    int i = posCadena;
+    int j;
+    //cuando es el caso simple -> a+
+    if(totalMeta() == 1) {
+        for(j = posCadena; j < cadena.length(); j++) {
+            if(cadena[j] != simbolo) return false;
+        }
+        if(posCadena == j) return false;
+    }
+    //cuando esta inmerso -> .a+. -> .a+ -> a+.
+    while(cadena[i] == simbolo) {
+        i++;
+    }
+    if(posCadena == i) return false;
+    else posCadena = i;
 
     return true;
+}
+
+bool Validator::filtroPipe(char x, char y) {
+    bool respuesta = false;
+    char aux;
+    if(totalMeta() == 1) { // caso simple x|y
+        if(cadena.length() > 1) return false;
+        else if(cadena[posCadena] == x || cadena[posCadena] == y) respuesta = true;
+    }
+    else if(cadena[posCadena] == x || cadena[posCadena] == y) { //caso inmerso
+        respuesta = true;
+        if(cadena[posCadena == x]) aux = y;
+        else aux = x;
+
+        if(cadena[posCadena+1] == aux) return false;
+        posCadena++;
+    }
+
+    return respuesta;
+}
+
+bool Validator::filtroQuestion(char simbol) {
+    bool respuesta = true;
+    if(totalMeta() == 1) { //Caso simple a?
+        if(cadena.length() > 1) return false;
+        else if(cadena[posCadena] == simbol || cadena[posCadena] == 'E') respuesta = true;
+    }
+    else {
+        if(simbol == cadena[posCadena] || cadena[posCadena] == 'E') {
+            respuesta = true;
+            posCadena++;
+        }
+        if(posExpresion == expresionRegular.length() - 1) {
+            if((posCadena-1) != cadena.length() - 1) respuesta = false;
+        }
+    }
+    return respuesta;
+}
+//Función para el caso simple a.b e inmerso [...].a.[...]
+bool Validator::filtroPunto(char x, char y, int opt) { //opt = 1, caso inmerso, opt = 0 caso simple
+    bool respuesta = false;
+    if(opt == 0) { //caso simple
+        cout << "Hola mundo " << x << " " << y << endl;
+        if(cadena[0] == x && cadena[1] == y)  {
+            respuesta = true;
+        }
+        if(cadena.length() > 2 || cadena.length() < 1) return false;
+    }
+    else { //caso inmerso
+        if(x == cadena[posCadena]) {
+            respuesta = true;
+            posCadena++;
+        }
+    }
+    return respuesta;
 }
 
 Validator::~Validator() {
 
 }
+
 int main(int argc, char const *argv[]) {
     int opc;
     bool respuesta, control = true;
