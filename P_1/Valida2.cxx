@@ -1,10 +1,28 @@
 #include <iostream>
 #include <cstdlib>
+#include <cstdio>
 #include <string>
 
-using namespace std;
+/* Nombre: David Betancourt Montellano
+ * Boleta: 2017670141
+ * Fecha: 14/09/2017
+ * UA: Teoría computacional
+ * Programa académico: ISC
+ * Evidencia: Práctica_2 Realización de un programa que reconozca un lenguaje
+   determinado.
+ * Descripción: Desarrollar un programa de computadora que
+   permita leer una expresión regular, una cadena determinada
+   y verifique si dicha cadena es aceptada por la expresión
+   regular
+ * Maestra: M. en Ed. Karina Rodríguez Mejía
+ * Grupo: 2CM1.
+*/
 
+using namespace std;
+//funciones genéricas de estructura básica
 int menu(string);
+int validaEntero();
+string validaExpresionRegular();
 
 class Validator {
     private:
@@ -63,41 +81,33 @@ bool Validator::valida() {
     bool respuesta = true;
     char meta, ultimoMeta = '<';
     int numeroMetas = totalMeta(), cont = 0;
-    cout << numeroMetas << endl;
-
+    //se "divide" la expresión regular como bloques, cada bloque se va ir validando
     while(cont < numeroMetas) {
         meta = encuentraMeta();
-        //cout << "Meta: " << meta << endl;
-        cout << "En la cadena " << cadena[posCadena] << ", contador es: " << cont << endl;
         switch(meta) {
             case '*':
                 if(!filtroAsterisco(expresionRegular[posExpresion - 1])) respuesta = false;
                 ultimoMeta = '*';
                 cont++;
-                cout << "Astérisco dice: " << respuesta << endl;
                 break;
             case '+':
                 if(!filtroPlus(expresionRegular[posExpresion - 1])) respuesta = false;
                 ultimoMeta = '+';
                 cont++;
-                cout << "Plus dice: " << respuesta << endl;
                 break;
             case '|':
                 if(!filtroPipe(expresionRegular[posExpresion - 1], expresionRegular[posExpresion + 1])) respuesta = false;
                 ultimoMeta = '|';
                 cont++;
-                cout << "Pipe dice: " << respuesta << endl;
                 break;
             case '?':
                 if(!filtroQuestion(expresionRegular[posExpresion - 1])) respuesta = false;
                 ultimoMeta = '?';
                 cont++;
-                cout << "Question dice: " << respuesta << endl;
                 break;
             case '.':
                 if(ultimoMeta == '.') { //caso [...].a.[...]
                     if(!filtroPunto(expresionRegular[posExpresion - 1], expresionRegular[posExpresion + 1], 1)) respuesta = false;
-                    cout << "Soy la c rara" << endl;
                     cont++;
                 }
                 else if(ultimoMeta == '<') { //cuando se da el caso a.[...]
@@ -111,14 +121,13 @@ bool Validator::valida() {
                 if(expresionRegular[expresionRegular.length()-2] == '.') {
                     cont++;
                 }
-                cout << "Punto: " << respuesta << endl;
                 break;
         }
         if(!respuesta) break;
     }
     return respuesta;
 }
-
+//cuenta la cantidad de meta-carácteres significativos para crear los bloques
 int Validator::totalMeta() {
     int total = 0;
     for (int i = 0; i < expresionRegular.length(); i++) {
@@ -191,7 +200,6 @@ bool Validator::filtroPlus(char simbolo) {
     }
     if(posCadena == i) return false;
     else posCadena = i;
-
     return true;
 }
 
@@ -235,7 +243,6 @@ bool Validator::filtroQuestion(char simbol) {
 bool Validator::filtroPunto(char x, char y, int opt) { //opt = 1, caso inmerso, opt = 0 caso simple
     bool respuesta = false;
     if(opt == 0) { //caso simple
-        cout << "Hola mundo " << x << " " << y << endl;
         if(cadena[0] == x && cadena[1] == y)  {
             respuesta = true;
         }
@@ -250,9 +257,7 @@ bool Validator::filtroPunto(char x, char y, int opt) { //opt = 1, caso inmerso, 
     return respuesta;
 }
 
-Validator::~Validator() {
-
-}
+Validator::~Validator() {}
 
 int main(int argc, char const *argv[]) {
     int opc;
@@ -261,7 +266,7 @@ int main(int argc, char const *argv[]) {
 
     system("clear");
     cout << "\tPARA EMPEZAR\nEscriba una expresión regular: ";
-    cin >> expresionRegular;
+    expresionRegular = validaExpresionRegular();
 
     Validator v(expresionRegular); // se instancia un nuevo objeto
 
@@ -271,7 +276,7 @@ int main(int argc, char const *argv[]) {
         switch(opc) {
             case 1:
                 cout << "Escriba la nueva expresión regular: ";
-                cin >> expresionRegular;
+                expresionRegular = validaExpresionRegular();
                 v.setExpresionRegular(expresionRegular);
                 cout << "\n¡Hecho!" << endl;
                 break;
@@ -281,6 +286,7 @@ int main(int argc, char const *argv[]) {
             case 3:
                 cout << "\nEscriba la cadena a validar: ";
                 cin >> cadena;
+                cin.get();
                 v.setCadena(cadena);
                 respuesta = v.valida();
                 cout << "La cadena: " << v.getCadena() << "--> ";
@@ -295,7 +301,7 @@ int main(int argc, char const *argv[]) {
                 break;
         }
         cout << "\nPresione una tecla para continuar...";
-        cin.ignore().get();
+        cin.get();
     } while(control);
 
     return 0;
@@ -309,7 +315,61 @@ int menu(string expresion) {
     cout << "[3] Validar cadena." << endl;
     cout << "[4] Salir." << endl;
     cout << ">> ";
-    cin >> opt;
+    opt = validaEntero();
 
     return opt;
+}
+
+int validaEntero() {
+    int num, ok, ch;
+    do {
+		fflush(stdout);
+		if ((ok = scanf("%d", &num)) == EOF)
+		return EXIT_FAILURE;
+
+		if ((ch = getchar()) != '\n') {
+    		ok = 0;
+    		printf("Vuelva a intentarlo: ");
+    		while ((ch = getchar()) != EOF && ch != '\n');
+		}
+	} while(!ok);
+
+	return num;
+}
+
+string validaExpresionRegular() {
+    string er;
+    bool key = true, control = false;
+    int cont = 0;
+
+    while(key) {
+        cin >> er;
+        control = false;
+        cont = 0;
+        for(int i = 0; i < er.length(); i++) {
+            if(i < er.length() - 1) { //evitar dos meta-carácteres diferentes
+                if(er[i] == er[i+1] && (er[i] != '.' && er[i] != '|' && er[i] != '*' && er[i] != '+' && er[i] != '?')) {
+                    cout << "Vuelva a intentarlo: ";
+                    control = true;
+                    break;
+                }
+            }
+
+            if(er[i] == '?' || er[i] == '.' || er[i] == '|' || er[i] == '*' || er[i] == '+') {
+                cont++;
+            }
+
+            if( ((int)er[i] < 97 || (int)er[i] > 122) && ((int)er[i] != 46) && ((int)er[i] != 42) && ((int)er[i] != 43) && ((int)er[i] != 124) && ((int)er[i] != 63)) {
+                cout << "Meta-carácter no válido, vuelva a intentarlo: ";
+                control = true;
+                break;
+            }
+        }
+        if(!control) key = false;
+        if(cont == 0 && !control) {
+            key = true;
+            cout << "Debe tener al menos un meta-carácter: ";
+        }
+    }
+    return er;
 }
