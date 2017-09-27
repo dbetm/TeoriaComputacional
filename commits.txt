@@ -1,3 +1,64 @@
+commit 4986ab02342adc4a2ca9fd389e546724381d197b
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Wed Sep 27 10:19:32 2017 -0500
+
+    Signed by @dbetm
+
+commit 6df871d34a39f2abc32fc99684ceebb9a9d245e8
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Thu Sep 14 20:26:49 2017 -0500
+
+    Final implementation, validation for regular expression and int's
+
+commit 67bc08eeef36a4906328c12daab488d721e31cc0
+Merge: d8fb5f9 a7ac2f5
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Thu Sep 14 18:45:10 2017 -0500
+
+    First complete test, was made seeing the expression as blocks joined by the points.
+
+commit a7ac2f547a209d0d38611946c899f5da3b2998a2
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Thu Sep 14 18:35:11 2017 -0500
+
+    First complete test, was made seeing the expression as blocks joined by the points.
+
+commit 87e170dcfae114cb2708d17d5f66b318bc703e97
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Wed Sep 13 19:52:35 2017 -0500
+
+    Valida2, a new idea, 'ValidaExpresionRegular.cxx' is not work, just experimental
+
+commit d8fb5f9ce462dc223f6f9cd103a37961982abac1
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Wed Sep 13 00:17:56 2017 -0500
+
+    Unstable, bug and good || good and bug
+
+commit 29cff63407e6ab9919392e07809a11a8d455f363
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Mon Sep 11 01:03:29 2017 -0500
+
+    Stage successful second test and implementation of a menu in main
+
+commit cafb8429b4cb695d17e3854fc3cc72d0db0be8d7
+Author: David <davbetm@gmail.com>
+Date:   Sat Sep 9 19:33:02 2017 -0500
+
+    Filter for each meta-character and stage successful first test
+
+commit 72bf4f7a5149054d3825daa07795fea75368a1e4
+Author: David <davbetm@gmail.com>
+Date:   Sat Sep 9 12:20:10 2017 -0500
+
+    Experimental stage, test correct: Found all meta-characters of regularExpression
+
+commit b825cd2a36181de5b40d21ee14c9a699467a859b
+Author: davbetm@gmail.com <davbetm@gmail.com>
+Date:   Sat Sep 9 10:45:43 2017 -0500
+
+    Find meta_characters
+
 commit a9dc48da2bc4b9b866f8c41df0be5b8acc0e9596
 Author: davbetm@gmail.com <davbetm@gmail.com>
 Date:   Thu Sep 7 11:24:12 2017 -0500
