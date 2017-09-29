@@ -19,25 +19,35 @@ struct Transicion { // (q_0, E) -> q1
 
 class Automata {
     private:
-        int estadoInicial;
+        int estadoActual;
         string expresionRegular;
+        vector <char> expRegularVector;
         vector <char> Alfabeto;
         vector <Transicion> Delta;
-        vector <int> EstadosFinales;
     public:
         Automata(string);
         void compilarAlfabeto();
         void setExpresionRegular(string);
         string getExpresionRegular();
-        int getEstadoInicial();
+        int getEstadoFinal();
         vector <char> getAlfabeto();
         vector <Transicion> getDelta();
-        vector <int> getEstadosFinales();
+        void generarEstados();
         ~Automata();
+    private:
+        void asterisco(char);
+        void plus(char);
+        void interrogacion(char);
+        void pipe(char, char);
+        void punto();
 };
 
 Automata::Automata(string eR) {
     this->expresionRegular = eR;
+    estadoActual = 0;
+    for (int i = 0; i < eR.length(); i++) {
+        expRegularVector.push_back(eR[i]);
+    }
 }
 
 void Automata::compilarAlfabeto() {
@@ -49,14 +59,21 @@ void Automata::compilarAlfabeto() {
 
 void Automata::setExpresionRegular(string eR) {
     this->expresionRegular = eR;
+    expRegularVector.clear();
+    Alfabeto.clear();
+    Delta.clear();
+    estadoActual = 0;
+    for (int i = 0; i < eR.length(); i++) {
+        expRegularVector.push_back(eR[i]);
+    }
 }
 
 string Automata::getExpresionRegular() {
     return this->expresionRegular;
 }
 
-int Automata::getEstadoInicial() {
-    return this->estadoInicial;
+int Automata::getEstadoFinal() {
+    return this->estadoActual;
 }
 
 vector <char> Automata::getAlfabeto() {
@@ -67,14 +84,104 @@ vector <Transicion> Automata::getDelta() {
     return this->Delta;
 }
 
-vector <int> Automata::getEstadosFinales() {
-    return this->EstadosFinales;
+void Automata::generarEstados() {
+    ui i = 0;
+    while(!expRegularVector.empty()) {
+        if(expRegularVector[i] == '*' || expRegularVector[i] == '+' || expRegularVector[i] == '?' ) {
+            if(expRegularVector[i] == '*') asterisco(expRegularVector[i-1]);
+            else if(expRegularVector[i] == '+') plus(expRegularVector[i-1]);
+            else interrogacion(expRegularVector[i-1]);
+
+            expRegularVector.erase(expRegularVector.begin(), expRegularVector.begin()+i+1);
+            i = 0;
+        }
+        else if(expRegularVector[i] == '|') {
+            pipe(expRegularVector[i-1], expRegularVector[i+1]);
+            expRegularVector.erase(expRegularVector.begin(), expRegularVector.begin()+i+2);
+
+        }
+        else if(expRegularVector[i] == '.') {
+        }
+        i++;
+    }
+}
+
+void Automata::asterisco(char condicion) {
+    int estadoAux = estadoActual;
+    Transicion aux;
+    for(ui i = 0; i < 5; i++) {
+        if(i == 0 || i == 1 || i == 2 || i == 3)
+            aux.estado = estadoActual;
+        if(i == 0 || i == 2 || i == 3 || i == 4)
+            aux.condicion = 'E';
+        if(i == 0 || i == 1 || i == 3)
+            estadoActual++;
+        if(i == 1) aux.condicion = condicion;
+        if(i == 2) aux.estadoDestino = estadoActual - 1;
+        if(i == 0 || i == 1 || i == 3 || i == 4)
+            aux.estadoDestino = estadoActual;
+        if(i == 4)
+            aux.estado = estadoAux;
+        Delta.push_back(aux);
+    }
+}
+
+void Automata::plus(char condicion) {
+    Transicion aux;
+    for(ui i = 0; i < 4; i++) {
+        if(i == 0 || i == 1 || i == 2 || i == 3)
+            aux.estado = estadoActual;
+        if(i == 0 || i == 2 || i == 3 || i == 4)
+            aux.condicion = 'E';
+        if(i == 0 || i == 1 || i == 3)
+            estadoActual++;
+        if(i == 1) aux.condicion = condicion;
+        if(i == 2) aux.estadoDestino = estadoActual - 1;
+        if(i == 0 || i == 1 || i == 3 || i == 4)
+            aux.estadoDestino = estadoActual;
+        Delta.push_back(aux);
+    }
+}
+
+void Automata::interrogacion(char condicion) {
+    int estadoAux = estadoActual;
+    Transicion aux;
+    for(ui i = 0; i < 4; i++) {
+        if(i == 0 || i == 1 || i == 2)
+            aux.estado = estadoActual;
+        if(i == 0 || i == 2 || i == 3)
+            aux.condicion = 'E';
+        if(i == 0 || i == 1 || i == 2)
+            estadoActual++;
+        if(i == 1) aux.condicion = condicion;
+        if(i == 3) aux.estado = estadoAux;
+        aux.estadoDestino = estadoActual;
+        Delta.push_back(aux);
+    }
+}
+
+void Automata::pipe(char x, char y) {
+    Transicion aux;
+    for(ui i = 0; i < 6; i++) {
+        if(i == 0)  aux.estado = estadoActual;
+        if(i != 0) aux.estado = estadoActual - 1;
+        if(i == 0 || i == 1 || i == 4 || i == 5) {
+            aux.condicion = 'E';
+        }
+        if(i == 2) aux.condicion = x;
+        if(i == 3) aux.condicion = y;
+        if(i != 5) estadoActual++;
+        aux.estadoDestino = estadoActual;
+        Delta.push_back(aux);
+    }
+}
+
+void Automata::punto() {
 }
 
 Automata::~Automata() {
     if(!Alfabeto.empty()) Alfabeto.clear();
     if(!Delta.empty()) Delta.clear();
-    if(!EstadosFinales.empty()) EstadosFinales.clear();
 }
 
 int main(int argc, char const *argv[]) {
@@ -82,6 +189,7 @@ int main(int argc, char const *argv[]) {
     bool respuesta, control = true;
     string expresionRegular;
     vector <char> alfabeto;
+    vector <Transicion> delta;
 
     system("clear");
     cout << "\tPARA EMPEZAR\nEscriba una expresión regular: ";
@@ -98,6 +206,7 @@ int main(int argc, char const *argv[]) {
                 expresionRegular = validaExpresionRegular();
                 a.setExpresionRegular(expresionRegular);
                 cout << "\n¡Hecho!" << endl;
+                cin.get();
                 break;
             case 2:
                 cout << "M = ({";
@@ -107,6 +216,13 @@ int main(int argc, char const *argv[]) {
                 for (ui i = 0; i < alfabeto.size(); i++) {
                     if(i + 1 == alfabeto.size()) cout << alfabeto[i] << "} ";
                     else cout << alfabeto[i] << ", ";
+                }
+                a.generarEstados();
+                //Transiciones
+                cout << endl;
+                delta = a.getDelta();
+                for (ui i = 0; i < delta.size(); i++) {
+                    cout << "(q" << delta[i].estado << ", " << delta[i].condicion << ")" << " -> " << "q" << delta[i].estadoDestino << endl;
                 }
                 break;
             case 3:
