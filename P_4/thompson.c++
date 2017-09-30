@@ -63,7 +63,7 @@ void Automata::setExpresionRegular(string eR) {
     Alfabeto.clear();
     Delta.clear();
     estadoActual = 0;
-    for (int i = 0; i < eR.length(); i++) {
+    for(ui i = 0; i < eR.length(); i++) {
         expRegularVector.push_back(eR[i]);
     }
 }
@@ -86,21 +86,53 @@ vector <Transicion> Automata::getDelta() {
 
 void Automata::generarEstados() {
     ui i = 0;
+
     while(!expRegularVector.empty()) {
         if(expRegularVector[i] == '*' || expRegularVector[i] == '+' || expRegularVector[i] == '?' ) {
             if(expRegularVector[i] == '*') asterisco(expRegularVector[i-1]);
             else if(expRegularVector[i] == '+') plus(expRegularVector[i-1]);
-            else interrogacion(expRegularVector[i-1]);
-
+            else if(expRegularVector[i] == '?') interrogacion(expRegularVector[i-1]);
             expRegularVector.erase(expRegularVector.begin(), expRegularVector.begin()+i+1);
             i = 0;
+            continue;
         }
         else if(expRegularVector[i] == '|') {
             pipe(expRegularVector[i-1], expRegularVector[i+1]);
             expRegularVector.erase(expRegularVector.begin(), expRegularVector.begin()+i+2);
-
+            i = 0;
+            continue;
         }
         else if(expRegularVector[i] == '.') {
+            punto();
+            expRegularVector.erase(expRegularVector.begin());
+            i = 0;
+            continue;
+        }
+        else {
+            if(expRegularVector.size() == 1) {
+                Transicion aux;
+                aux.estado = estadoActual;
+                aux.condicion = expRegularVector[i];
+                estadoActual++;
+                aux.estadoDestino = estadoActual;
+                Delta.push_back(aux);
+                expRegularVector.erase(expRegularVector.begin());
+                i = 0;
+                continue;
+            }
+            else {
+                if(expRegularVector[i+1] == '.') {
+                    Transicion aux;
+                    aux.estado = estadoActual;
+                    aux.condicion = expRegularVector[i];
+                    estadoActual++;
+                    aux.estadoDestino = estadoActual;
+                    Delta.push_back(aux);
+                    expRegularVector.erase(expRegularVector.begin());
+                    i = 0;
+                    continue;
+                }
+            }
         }
         i++;
     }
@@ -165,9 +197,8 @@ void Automata::pipe(char x, char y) {
     for(ui i = 0; i < 6; i++) {
         if(i == 0)  aux.estado = estadoActual;
         if(i != 0) aux.estado = estadoActual - 1;
-        if(i == 0 || i == 1 || i == 4 || i == 5) {
+        if(i == 0 || i == 1 || i == 4 || i == 5)
             aux.condicion = 'E';
-        }
         if(i == 2) aux.condicion = x;
         if(i == 3) aux.condicion = y;
         if(i != 5) estadoActual++;
@@ -177,6 +208,12 @@ void Automata::pipe(char x, char y) {
 }
 
 void Automata::punto() {
+    Transicion aux;
+    aux.estado = estadoActual;
+    aux.condicion = 'E';
+    estadoActual++;
+    aux.estadoDestino = estadoActual;
+    Delta.push_back(aux);
 }
 
 Automata::~Automata() {
@@ -192,7 +229,7 @@ int main(int argc, char const *argv[]) {
     vector <Transicion> delta;
 
     system("clear");
-    cout << "\tPARA EMPEZAR\nEscriba una expresión regular: ";
+    cout << "\tPARA EMPEZAR\nEscriba una expresión regular (Ej. a.b?.c*): ";
     expresionRegular = validaExpresionRegular();
 
     Automata a(expresionRegular); // se instancia un nuevo objeto
@@ -209,21 +246,31 @@ int main(int argc, char const *argv[]) {
                 cin.get();
                 break;
             case 2:
-                cout << "M = ({";
+                cout << "\nM = ({";
                 //para el alfabeto
                 a.compilarAlfabeto();
                 alfabeto = a.getAlfabeto();
-                for (ui i = 0; i < alfabeto.size(); i++) {
-                    if(i + 1 == alfabeto.size()) cout << alfabeto[i] << "} ";
-                    else cout << alfabeto[i] << ", ";
+                for(ui i = 0; i < alfabeto.size(); i++) {
+                    if(i + 1 == alfabeto.size()) cout << alfabeto[i] << "}, ";
+                    else cout << alfabeto[i] << ",";
                 }
                 a.generarEstados();
+                //estados
+                cout << "{";
+                for(ui i = 0; i <= a.getEstadoFinal(); i++) {
+                    if(i == a.getEstadoFinal()) cout << "q" << i << "}, ";
+                    else cout << "q" << i << ",";
+                }
+                cout << "Transiciones, {q0}, {q" << a.getEstadoFinal() << "})";
                 //Transiciones
                 cout << endl;
                 delta = a.getDelta();
+                cout << "\nTransiciones  =  {" << endl;
                 for (ui i = 0; i < delta.size(); i++) {
-                    cout << "(q" << delta[i].estado << ", " << delta[i].condicion << ")" << " -> " << "q" << delta[i].estadoDestino << endl;
+                    cout << "(q" << delta[i].estado << ", " << delta[i].condicion << ")"
+                        << " -> " << "q" << delta[i].estadoDestino << endl;
                 }
+                cout << "\t\t}" << endl;
                 break;
             case 3:
                 control = false;
@@ -253,21 +300,20 @@ int menu(string expresion) {
 int validaEntero() {
     int num, ok, ch;
     do {
-		fflush(stdout);
-		if ((ok = scanf("%d", &num)) == EOF)
-		return EXIT_FAILURE;
+    	fflush(stdout);
+    	if ((ok = scanf("%d", &num)) == EOF)
+    	return EXIT_FAILURE;
 
-		if ((ch = getchar()) != '\n') {
+    	if ((ch = getchar()) != '\n') {
     		ok = 0;
-    		printf("Vuelva a intentarlo: ");
+    		printf("\nVuelva a intentarlo: ");
     		while ((ch = getchar()) != EOF && ch != '\n');
-		}
+    	}
 	} while(!ok);
-
 	return num;
 }
 
-string validaExpresionRegular() {
+string validaExpresionRegular() { //NOTA: No funciona al 100%, etapa experimental 29-09-2017
     string er;
     bool key = true, control = false;
     int cont = 0;
@@ -279,7 +325,7 @@ string validaExpresionRegular() {
         for(int unsigned i = 0; i < er.length(); i++) {
             if(i < er.length() - 1) { //evitar dos meta-carácteres diferentes
                 if(er[i] == er[i+1] && (er[i] != '.' && er[i] != '|' && er[i] != '*' && er[i] != '+' && er[i] != '?')) {
-                    cout << "Vuelva a intentarlo: ";
+                    cout << "\nVuelva a intentarlo: ";
                     control = true;
                     break;
                 }
@@ -289,8 +335,8 @@ string validaExpresionRegular() {
                 cont++;
             }
 
-            if( ((int)er[i] < 97 || (int)er[i] > 122) && ((int)er[i] != 46) && ((int)er[i] != 42) && ((int)er[i] != 43) && ((int)er[i] != 124) && ((int)er[i] != 63)) {
-                cout << "Meta-carácter no válido, vuelva a intentarlo: ";
+            if( ((int)er[i] < 65 || (int)er[i] > 122) && ((int)er[i] != 46) && ((int)er[i] != 42) && ((int)er[i] != 43) && ((int)er[i] != 124) && ((int)er[i] != 63)) {
+                cout << "\nMeta-carácter no válido, vuelva a intentarlo, o debe usar [Aa-Zz]: ";
                 control = true;
                 break;
             }
@@ -298,7 +344,7 @@ string validaExpresionRegular() {
         if(!control) key = false;
         if(cont == 0 && !control) {
             key = true;
-            cout << "Debe tener al menos un meta-carácter: ";
+            cout << "\nDebe tener al menos un meta-carácter: ";
         }
     }
     return er;
