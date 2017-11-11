@@ -8,9 +8,9 @@
 using namespace std;
 
 struct Pro {
-    sting terminal;
+    string terminal;
     vector <string> noTerminales;
-}
+};
 
 class Normalizer {
     private:
@@ -19,6 +19,17 @@ class Normalizer {
         vector <Pro> gramF; // gramática etapa final
     public:
         Normalizer();
+        void leerGramatica();
+        void mostrarGramaticaFinal();
+        //Etapa 1 (a)
+        Pro buscarFormaSimple();
+        void quitarFormaSimple(int index);
+        //Etapa 1 (b)
+        void compilarNoTerminales();
+        void generarTerminales();
+        //Etapa 1 (c)
+        void sustituir();
+
         ~Normalizer();
 };
 
