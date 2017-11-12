@@ -4,8 +4,7 @@
 
 struct Pro {
     string terminal;
-    vector <char> elementos;
-    // vector < vector <char> > elementos; //corregir problema descubierto en la primera etapa
+    vector <string> elementos;
 };
 
 class Normalizer {
