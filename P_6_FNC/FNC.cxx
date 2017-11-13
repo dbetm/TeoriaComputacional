@@ -24,7 +24,7 @@ class Normalizer {
         void generarTerminales(vector <char>);
         //Etapa 1 (c)
         void sustituir(unsigned int);
-        char buscarEnGramE1(unsigned int, char);
+        string buscarEnGramE1(unsigned int, char); //busca elementos de producciones generadas
         ~Normalizer();
 };
 
@@ -47,13 +47,13 @@ void Normalizer::leerGramatica(unsigned int numPro, vector <string> pros) {
     }
 
     //mostrando lo que guarda
-    for(unsigned int i = 0; i < numPro; i++) {
-        cout << gramatica[i].terminal << " -> ";
-        for(unsigned int j = 0; j < gramatica[i].elementos.size(); j++) {
-            cout << gramatica[i].elementos[j];
-        }
-        cout << endl;
-    }
+    // for(unsigned int i = 0; i < numPro; i++) {
+    //     cout << gramatica[i].terminal << " -> ";
+    //     for(unsigned int j = 0; j < gramatica[i].elementos.size(); j++) {
+    //         cout << gramatica[i].elementos[j];
+    //     }
+    //     cout << endl;
+    // }
 }
 
 void Normalizer::mostrarGramaticaFinal() {
@@ -75,16 +75,6 @@ void Normalizer::buscarFormaSimple() { //buscar las que tienen la forma P -> a
             i--;
         }
     }
-
-    //mostrando lo que guarda
-    cout << endl;
-    for(unsigned int i = 0; i < gramE1.size(); i++) {
-        cout << gramE1[i].terminal << " -> ";
-        for(unsigned int j = 0; j < gramE1[i].elementos.size(); j++) {
-            cout << gramE1[i].elementos[j];
-        }
-        cout << endl;
-    }
 }
 
 //Etapa 1 (b)
@@ -92,29 +82,34 @@ void Normalizer::compilarNoTerminales() {
     vector <char> noTerminales;
     for(unsigned int i = 0; i < gramatica.size(); i++) {
         for(unsigned int j = 0; j < gramatica[i].elementos.size(); j++) {
-            if((int)gramatica[i].elementos[j] >= 97 && (int)gramatica[i].elementos[j] <= 122) {
-                if(find(noTerminales.begin(), noTerminales.end(), gramatica[i].elementos[j]) == noTerminales.end()) //para evitar duplicados
-                    noTerminales.push_back(gramatica[i].elementos[j]);
+            if(gramatica[i].elementos[j].size() == 1) {
+                if((int)gramatica[i].elementos[j][0] >= 97 && (int)gramatica[i].elementos[j][0] <= 122) {
+                    if(find(noTerminales.begin(), noTerminales.end(), gramatica[i].elementos[j][0]) == noTerminales.end()) //para evitar duplicados
+                    noTerminales.push_back(gramatica[i].elementos[j][0]);
+                }
             }
         }
     }
-    // --Test display
-    cout << endl;
-    for(unsigned int i = 0; i < noTerminales.size(); i++) {
-        cout << noTerminales[i] << " ";
-    }
-    cout << endl;
+    // // --Test display
+    // cout << endl;
+    // for(unsigned int i = 0; i < noTerminales.size(); i++) {
+    //     cout << noTerminales[i] << " ";
+    // }
+    // cout << endl;
     generarTerminales(noTerminales);
 }
 
 void Normalizer::generarTerminales(vector <char> noTerminales) {
     Pro Aux;
-    unsigned int ref = gramE1.size() - 1;
+    string aux;
+    unsigned int ref = gramE1.size() - 1; //referencia para que al hacer las sustituciones solo se tomen en cuenta la generadas
     for(unsigned int i = 0; i < noTerminales.size(); i++) {
         Aux.terminal = "";
-        Aux.terminal += "A_" + to_string(actualA);
+        aux = "";
+        Aux.terminal += "A" + to_string(actualA);
         actualA++;
-        Aux.elementos.push_back(noTerminales[i]);
+        aux += noTerminales[i];
+        Aux.elementos.push_back(aux);
         gramE1.push_back(Aux);
         Aux.elementos.clear();
     }
@@ -126,31 +121,33 @@ void Normalizer::generarTerminales(vector <char> noTerminales) {
 void Normalizer::sustituir(unsigned int ref) {
     for(unsigned int i = 0; i < gramatica.size(); i++) {
         for(unsigned int j = 0; j < gramatica[i].elementos.size(); j++) {
-            if((int)gramatica[i].elementos[j] >= 97 && (int)gramatica[i].elementos[j] <= 122) {
-                gramatica[i].elementos[j] = buscarEnGramE1(ref, gramatica[i].elementos[j]);
+            if(gramatica[i].elementos[j].size() == 1) {
+                if((int)gramatica[i].elementos[j][0] >= 97 && (int)gramatica[i].elementos[j][0] <= 122) {
+                    gramatica[i].elementos[j] = buscarEnGramE1(ref, gramatica[i].elementos[j][0]);
+                }
             }
         }
         gramE1.push_back(gramatica[i]);
     }
 
     // -Test
-    cout << endl;
+    cout << "\nPrimera etapa finalizada" << endl;
     for(unsigned int i = ref; i < gramE1.size(); i++) {
         cout << gramE1[i].terminal << " -> ";
         for(unsigned int j = 0; j < gramE1[i].elementos.size(); j++) {
-            cout << gramE1[i].elementos[j];
+            cout << gramE1[i].elementos[j] << " ";
         }
         cout << endl;
     }
 }
 //Retorna el Terminal generado
-char Normalizer::buscarEnGramE1(unsigned int ref, char elemento) {
+string Normalizer::buscarEnGramE1(unsigned int ref, char elemento) {
     for(unsigned int i = 0; i < gramE1.size(); i++) {
         if(gramE1[i].elementos.size() == 1) {
-            if(elemento == gramE1[i].elementos[0]) return gramE1[i].terminal[0];
+            if(elemento == gramE1[i].elementos[0][0]) return gramE1[i].terminal;
         }
     }
-    return '#';
+    return "#";
 }
 
 Normalizer::~Normalizer() {

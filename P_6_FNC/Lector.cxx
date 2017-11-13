@@ -23,7 +23,7 @@ Lector::Lector(string produccion) {
             this->produccion.push_back(aux);
         }
         else {
-            while((i+1 != produccion.size() && produccion[i+1] == '_') || (i+1 != produccion.size() && (int)produccion[i+1] >= 48 && (int)produccion[i+1] <= 57)) {
+            while(i+1 != produccion.size() && (int)produccion[i+1] >= 48 && (int)produccion[i+1] <= 57) {
                 aux += produccion[i+1];
                 i++;
             }
