@@ -25,6 +25,11 @@ class Normalizer {
         //Etapa 1 (c)
         void sustituir(unsigned int);
         string buscarEnGramE1(unsigned int, char); //busca elementos de producciones generadas
+        //Etapa 2 (a)
+        void agregarElementosNormalizados();
+        //Etapa 2 (b)
+        void generarPares(); //los va generando e incluyendo en el vector gramática final
+        string generarTerminalE2();
         ~Normalizer();
 };
 
@@ -60,7 +65,7 @@ void Normalizer::mostrarGramaticaFinal() {
     for(unsigned int i = 0; i < gramF.size(); i++) {
         cout << gramF[i].terminal << " -> ";
         for(unsigned int j = 0; j < gramF[i].elementos.size(); j++) {
-            cout << gramF[i].elementos[j];
+            cout << gramF[i].elementos[j] << " ";
         }
         cout << endl;
     }
@@ -131,14 +136,14 @@ void Normalizer::sustituir(unsigned int ref) {
     }
 
     // -Test
-    cout << "\nPrimera etapa finalizada" << endl;
-    for(unsigned int i = ref; i < gramE1.size(); i++) {
-        cout << gramE1[i].terminal << " -> ";
-        for(unsigned int j = 0; j < gramE1[i].elementos.size(); j++) {
-            cout << gramE1[i].elementos[j] << " ";
-        }
-        cout << endl;
-    }
+    // cout << "\nPrimera etapa finalizada" << endl;
+    // for(unsigned int i = ref; i < gramE1.size(); i++) {
+    //     cout << gramE1[i].terminal << " -> ";
+    //     for(unsigned int j = 0; j < gramE1[i].elementos.size(); j++) {
+    //         cout << gramE1[i].elementos[j] << " ";
+    //     }
+    //     cout << endl;
+    // }
 }
 //Retorna el Terminal generado
 string Normalizer::buscarEnGramE1(unsigned int ref, char elemento) {
@@ -148,6 +153,43 @@ string Normalizer::buscarEnGramE1(unsigned int ref, char elemento) {
         }
     }
     return "#";
+}
+
+//Etapa 2 (a)
+void Normalizer::agregarElementosNormalizados() { //ejemplo A1 -> a o A -> bA1;
+    for(unsigned int i = 0; i < gramE1.size(); i++) {
+        if(gramE1[i].elementos.size() == 2 || gramE1[i].elementos.size() == 1) {
+            gramF.push_back(gramE1[i]);
+            gramE1.erase(gramE1.begin()+i);
+            i--;
+        }
+    }
+}
+
+//Etapa 2 (b)
+void Normalizer::generarPares() {
+    vector <string> AuxTerm;
+    string term;
+    for(unsigned int i = 0; i < gramE1.size(); i++) {
+        term = gramE1[i].terminal;
+        for(unsigned int j = 0; j < gramE1[i].elementos.size() - 1; j++) {
+            Pro Aux;
+            Aux.terminal = term;
+            Aux.elementos.push_back(gramE1[i].elementos[j]);
+            if(j < gramE1[i].elementos.size() - 2) term = generarTerminalE2();
+            else term = gramE1[i].elementos[j+1];
+
+            Aux.elementos.push_back(term);
+            gramF.push_back(Aux);
+        }
+    }
+}
+
+string Normalizer::generarTerminalE2() {
+    string terminal = "";
+    terminal += "A" + to_string(actualA);
+    actualA++;
+    return terminal;
 }
 
 Normalizer::~Normalizer() {
@@ -171,6 +213,9 @@ int main(int argc, char const *argv[]) {
     n1.leerGramatica(pros.size(), pros);
     n1.buscarFormaSimple();
     n1.compilarNoTerminales();
-
+    //segunda etapa
+    n1.agregarElementosNormalizados();
+    n1.generarPares();
+    n1.mostrarGramaticaFinal();
     return 0;
 }
