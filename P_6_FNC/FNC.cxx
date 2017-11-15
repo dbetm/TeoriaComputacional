@@ -2,6 +2,8 @@
 #include "header.cc"
 // Programa que lleva a la forma normal de Chomsky determinada gramática
 
+vector <string> lectura();
+
 struct Pro {
     string terminal;
     vector <string> elementos;
@@ -63,7 +65,7 @@ void Normalizer::leerGramatica(unsigned int numPro, vector <string> pros) {
 
 void Normalizer::mostrarGramaticaFinal() {
     for(unsigned int i = 0; i < gramF.size(); i++) {
-        cout << gramF[i].terminal << " -> ";
+        cout << " " << gramF[i].terminal << " ->\t";
         for(unsigned int j = 0; j < gramF[i].elementos.size(); j++) {
             cout << gramF[i].elementos[j] << " ";
         }
@@ -199,8 +201,50 @@ Normalizer::~Normalizer() {
 }
 
 int main(int argc, char const *argv[]) {
+    char opc;
+    bool control = true;
+
+    do {
+        system("clear");
+        vector <string> pros = lectura(); //lee todas los elementos de la produccion de un archivo
+
+        if(pros.size() == 0) {
+            cout << "Oh, parece que el archivo donde se encuentra la gramática está vacío" << endl;
+            cout << "Modifiquelo y enseguida de enter para continuar...";
+            cin.get();
+            continue;
+        }
+        cout << "\tSU GRAMÁTICA ES: " << endl;
+        for(unsigned int i = 0; i < pros.size(); i++) {
+            cout << " " << pros[i] << endl;
+        }
+        cout << "PRESIONE ENTER PARA NORMALIZAR..";
+        cin.ignore().get();
+
+        cout << "\n\tFORMA NORMAL DE CHOMSKY: " << endl;
+        Normalizer n1;
+        //Llamada a los métodos del objeto
+        n1.leerGramatica(pros.size(), pros); //número de producciones, vector <string> de producciones
+        //primera etapa
+        n1.buscarFormaSimple();
+        n1.compilarNoTerminales();
+        //segunda etapa
+        n1.agregarElementosNormalizados();
+        n1.generarPares();
+        n1.mostrarGramaticaFinal();
+        cout << "\n (NOTA: Debe modificar el archivo de texto para intentar con otra gramática)" << endl;
+
+        cout << "\n Intentar otra vez (S/N) >> ";
+        cin >> opc;
+        if(opc == 'S' || opc == 's') {
+            system("nano gramatica1.txt");
+            continue;
+        }
+        else break;
+    } while(control);
+    /*
     Normalizer n1;
-    vector <string> pros;
+    vector <string> pros = lectura();
     pros.push_back("S->maAcaA");
     pros.push_back("S->maBca");
     pros.push_back("S->macaA");
@@ -210,12 +254,26 @@ int main(int argc, char const *argv[]) {
     pros.push_back("A->aCdA");
     pros.push_back("A->aCd");
     pros.push_back("C->y");
-    n1.leerGramatica(pros.size(), pros);
-    n1.buscarFormaSimple();
-    n1.compilarNoTerminales();
-    //segunda etapa
-    n1.agregarElementosNormalizados();
-    n1.generarPares();
-    n1.mostrarGramaticaFinal();
+    */
     return 0;
+}
+
+vector <string> lectura() {
+    vector <string> v;
+    ifstream archivo;
+    string produccion;
+
+    archivo.open("gramatica1.txt", ios::in);
+    if(archivo.fail()) {
+        cout << "Ha ocurrido un error al tratar de abrir el archivo de la gramática" << endl;
+        exit(1);
+    }
+
+    while(!archivo.eof()) {
+        getline(archivo,produccion);
+        v.push_back(produccion);
+    }
+    archivo.close();
+    v.erase(v.begin()+v.size()); //quitar la cadena vacía
+    return v;
 }

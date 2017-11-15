@@ -1,0 +1,7 @@
+S->abcDA
+S->abcD
+S->abcA
+S->abcx
+A->aA
+A->a
+D->d
