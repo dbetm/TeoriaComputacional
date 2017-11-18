@@ -1,6 +1,26 @@
 #include "Lector.cxx"
 #include "header.cc"
-// Programa que lleva a la forma normal de Chomsky determinada gramática
+
+/* Nombre: David Betancourt Montellano
+ * Boleta: 2017670141
+ * Fecha: 18/11/2017
+ * UA: Teoría computacional
+ * Programa académico: ISC
+ * Evidencia: Práctica_6 Realizar un programa que lea una gramática y obtenga su forma normal de chomsky.
+ * Descripción: Implementar los conocimientos teóricos para la obtención de la forma normal de chomsky.
+ * Desarrollar un programa de computadora que permita leer las reglas y sus producciones y muestre su FNC.
+ * Maestra: M. en Ed. Karina Rodríguez Mejía
+ * Grupo: 2CM1.
+*/
+
+/* NOTAS:
+    1) Compilado con: g++ -std=c++11 -Wall FNC.cxx -o FNC.
+    2) La gramática se carga del archivo 'gramatica0.txt'.
+    3) Enfocado a plataforma GNU/Linux con el editor  de texto nano.
+    4) Para correr de forma correcta en Windows debe hacer algunas modificaciones
+        ya que se requiere del editor nano, y las llamadas con system(""); son diferentes.
+    5) Disponible en: 
+*/
 
 vector <string> lectura();
 
@@ -20,6 +40,7 @@ class Normalizer {
         void leerGramatica(unsigned int, vector <string>);
         void mostrarGramaticaFinal();
         //Etapa 1 (a)
+        void encontrarAMax();
         void buscarFormaSimple();
         //Etapa 1 (b)
         void compilarNoTerminales();
@@ -44,7 +65,6 @@ void Normalizer::leerGramatica(unsigned int numPro, vector <string> pros) {
     string produccion;
     for(unsigned int i = 0; i < numPro; i++) {
         if(!aux.elementos.empty()) aux.elementos.clear();
-        // -- cout << "Escriba la producción (ej. A->abcDA): ";
         produccion = pros[i];
         //Instanciando un nuevo objeto de la clase Lector
         Lector l(produccion);
@@ -52,15 +72,6 @@ void Normalizer::leerGramatica(unsigned int numPro, vector <string> pros) {
         aux.elementos = l.getElementos();
         gramatica.push_back(aux);
     }
-
-    //mostrando lo que guarda
-    // for(unsigned int i = 0; i < numPro; i++) {
-    //     cout << gramatica[i].terminal << " -> ";
-    //     for(unsigned int j = 0; j < gramatica[i].elementos.size(); j++) {
-    //         cout << gramatica[i].elementos[j];
-    //     }
-    //     cout << endl;
-    // }
 }
 
 void Normalizer::mostrarGramaticaFinal() {
@@ -74,6 +85,24 @@ void Normalizer::mostrarGramaticaFinal() {
 }
 
 //Etapa 1 (a)
+void Normalizer::encontrarAMax() { //suponiendo que si inicialmente exista un A_n, donde n >= 1
+    string numero;
+    int auxNumero, auxNumero2 = 0;
+    for(unsigned int i = 0; i < gramatica.size(); i++) {
+        if(gramatica[i].terminal[0] == 'A' && gramatica[i].terminal.size() > 0) {
+            numero = "";
+            for(unsigned int j = 1; j < gramatica[i].terminal.size(); j++) {
+                numero += gramatica[i].terminal[j];
+            }
+            auxNumero = atoi(numero.c_str());
+            if(auxNumero > auxNumero2) {
+                auxNumero2 = auxNumero;
+            }
+        }
+    }
+    actualA = auxNumero2 + 1;
+}
+
 void Normalizer::buscarFormaSimple() { //buscar las que tienen la forma P -> a
     for(unsigned int i = 0; i < gramatica.size(); i++) {
         if(gramatica[i].elementos.size() == 1) {
@@ -97,19 +126,14 @@ void Normalizer::compilarNoTerminales() {
             }
         }
     }
-    // // --Test display
-    // cout << endl;
-    // for(unsigned int i = 0; i < noTerminales.size(); i++) {
-    //     cout << noTerminales[i] << " ";
-    // }
-    // cout << endl;
+
     generarTerminales(noTerminales);
 }
 
 void Normalizer::generarTerminales(vector <char> noTerminales) {
     Pro Aux;
     string aux;
-    unsigned int ref = gramE1.size() - 1; //referencia para que al hacer las sustituciones solo se tomen en cuenta la generadas
+    unsigned int ref = gramE1.size(); //referencia para que al hacer las sustituciones solo se tomen en cuenta la generadas
     for(unsigned int i = 0; i < noTerminales.size(); i++) {
         Aux.terminal = "";
         aux = "";
@@ -139,7 +163,7 @@ void Normalizer::sustituir(unsigned int ref) {
 
     // -Test
     // cout << "\nPrimera etapa finalizada" << endl;
-    // for(unsigned int i = ref; i < gramE1.size(); i++) {
+    // for(unsigned int i = 0; i < gramE1.size(); i++) {
     //     cout << gramE1[i].terminal << " -> ";
     //     for(unsigned int j = 0; j < gramE1[i].elementos.size(); j++) {
     //         cout << gramE1[i].elementos[j] << " ";
@@ -149,7 +173,7 @@ void Normalizer::sustituir(unsigned int ref) {
 }
 //Retorna el Terminal generado
 string Normalizer::buscarEnGramE1(unsigned int ref, char elemento) {
-    for(unsigned int i = 0; i < gramE1.size(); i++) {
+    for(unsigned int i = ref; i < gramE1.size(); i++) {
         if(gramE1[i].elementos.size() == 1) {
             if(elemento == gramE1[i].elementos[0][0]) return gramE1[i].terminal;
         }
@@ -202,11 +226,11 @@ Normalizer::~Normalizer() {
 
 int main(int argc, char const *argv[]) {
     char opc;
-    bool control = true;
+    bool control = true; // flagBug = false;
 
     do {
         system("clear");
-        vector <string> pros = lectura(); //lee todas los elementos de la produccion de un archivo
+        vector <string> pros = Lector::lectura(); //lee todas los elementos de la produccion de un archivo
 
         if(pros.size() == 0) {
             cout << "Oh, parece que el archivo donde se encuentra la gramática está vacío" << endl;
@@ -218,14 +242,15 @@ int main(int argc, char const *argv[]) {
         for(unsigned int i = 0; i < pros.size(); i++) {
             cout << " " << pros[i] << endl;
         }
-        cout << "PRESIONE ENTER PARA NORMALIZAR..";
-        cin.ignore().get();
+        cout << "PRESIONE ENTER PARA NORMALIZAR...";
+        cin.get();
 
         cout << "\n\tFORMA NORMAL DE CHOMSKY: " << endl;
         Normalizer n1;
         //Llamada a los métodos del objeto
         n1.leerGramatica(pros.size(), pros); //número de producciones, vector <string> de producciones
         //primera etapa
+        n1.encontrarAMax();
         n1.buscarFormaSimple();
         n1.compilarNoTerminales();
         //segunda etapa
@@ -237,43 +262,11 @@ int main(int argc, char const *argv[]) {
         cout << "\n Intentar otra vez (S/N) >> ";
         cin >> opc;
         if(opc == 'S' || opc == 's') {
-            system("nano gramatica1.txt");
+            system("nano gramatica1.txt"); // abre el editor nano de un entorno Linux
+            //if(!flagBug) flagBug = true;
             continue;
         }
         else break;
     } while(control);
-    /*
-    Normalizer n1;
-    vector <string> pros = lectura();
-    pros.push_back("S->maAcaA");
-    pros.push_back("S->maBca");
-    pros.push_back("S->macaA");
-    pros.push_back("S->maca");
-    pros.push_back("B->maB");
-    pros.push_back("B->ma");
-    pros.push_back("A->aCdA");
-    pros.push_back("A->aCd");
-    pros.push_back("C->y");
-    */
     return 0;
-}
-
-vector <string> lectura() {
-    vector <string> v;
-    ifstream archivo;
-    string produccion;
-
-    archivo.open("gramatica1.txt", ios::in);
-    if(archivo.fail()) {
-        cout << "Ha ocurrido un error al tratar de abrir el archivo de la gramática" << endl;
-        exit(1);
-    }
-
-    while(!archivo.eof()) {
-        getline(archivo,produccion);
-        v.push_back(produccion);
-    }
-    archivo.close();
-    v.erase(v.begin()+v.size()); //quitar la cadena vacía
-    return v;
 }

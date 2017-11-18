@@ -9,6 +9,7 @@ class Lector {
         Lector(string);
         string getTerminal();
         vector <string> getElementos();
+        static vector <string> lectura();
         ~Lector();
     private:
         void generaTerminal();
@@ -53,10 +54,31 @@ string Lector::getTerminal() {
     generaTerminal();
     return this->terminal;
 }
-//retorna el resto de elementos que produce la produccion
+//retorna el resto de elementos que produce la producción
 vector <string> Lector::getElementos() {
     generaElementos();
     return this->elementos;
+}
+
+vector <string> Lector::lectura() {
+    vector <string> v;
+    ifstream archivo;
+    string produccion;
+
+    archivo.open("gramatica0.txt", ios::in);
+    if(archivo.fail()) {
+        cout << "Ha ocurrido un error al tratar de abrir el archivo de la gramática" << endl;
+        exit(1);
+    }
+
+    while(!archivo.eof()) {
+        getline(archivo,produccion);
+        if(produccion == "") continue;
+        v.push_back(produccion);
+    }
+    archivo.close();
+    //v.erase(v.begin()+v.size()); //quitar la cadena vacía
+    return v;
 }
 
 Lector::~Lector() {

@@ -1,0 +1,14 @@
+S->A1cA2
+S->cA2
+S->A1c
+S->c
+A1->aA1
+A1->bA1
+A1->a
+A1->b
+A2->cA2A3
+A2->cA3
+A3->A1cA2
+A3->cA2
+A3->A1c
+A3->c

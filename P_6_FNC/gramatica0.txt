@@ -1,9 +1,7 @@
-S->maAcaA
-S->maBca
-S->macaA
-S->maca
-B->maB
-B->ma
-A->aCdA
-A->aCd
-C->y
+S->abcDA
+S->abcD
+S->abcA
+S->abc
+A->aA
+A->a
+D->d

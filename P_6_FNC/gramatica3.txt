@@ -1,0 +1,7 @@
+S->abA1deA2
+A1->abA1A3
+A1->abA3
+A2->deA2
+A2->de
+A3->bA3
+A3->b

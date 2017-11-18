@@ -1,0 +1,12 @@
+S->hAlBC
+S->hAlB
+A->oA
+A->o
+B->aB
+B->a
+C->coD
+D->moE
+E->esF
+F->taG
+F->ta
+G->s
